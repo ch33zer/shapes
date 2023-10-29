@@ -1,0 +1,45 @@
+<canvas id="canvas"></canvas>
+<script>
+  const c = document.getElementById("canvas")
+  const ctx = c.getContext("2d");
+  let prev = null;
+  let dot_pos = {x: 50, y: 50}
+  function circle(ctx, x, y) {
+    ctx.beginPath();
+    ctx.ellipse(x, y, 20, 20, 0, 0, 2 * Math.PI);
+    ctx.stroke()
+  }
+  function quadraticBezier(ctx, startx, starty, ctrlx, ctrly, endx, endy) {
+    ctx.beginPath()
+    ctx.moveTo(startx, starty);
+    ctx.quadraticCurveTo(ctrlx, ctrly, endx, endy);
+    ctx.stroke();
+  }
+  function draw(time) {
+    if (prev === null) {
+      prev = time;
+    }
+    const c = document.getElementById("canvas");
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    const ctx = c.getContext("2d");
+    const WIDTH = c.width;
+    const HEIGHT = c.height;
+    ctx.clearRect(0, 0, WIDTH, HEIGHT)
+    quadraticBezier(ctx, 0, 0, dot_pos.x, dot_pos.y, WIDTH, HEIGHT)
+    quadraticBezier(ctx, WIDTH, 0, WIDTH - dot_pos.x, dot_pos.y, 0, HEIGHT)
+    circle(ctx, dot_pos.x, dot_pos.y);
+    window.requestAnimationFrame(draw);
+    prev = time;
+  }
+  function startDrawing() {
+    document.getElementById("canvas").addEventListener("mousemove", function (e) {
+      if (e.buttons === 1) {
+        dot_pos = {x: e.x, y: e.y}
+      }
+    })
+    window.requestAnimationFrame(draw);
+  }
+  window.addEventListener("load", startDrawing);
+
+</script>
