@@ -7,9 +7,12 @@
   <script>
     const c = document.getElementById("canvas")
     const ctx = c.getContext("2d");
+    const AUTO_SPEED = 8;
+    const DEBUG = false;
     let prev = null;
     let dot_pos = {x: 50, y: 50}
     let line_h = 240;
+    let last_click = null;
     function circle(ctx, x, y) {
       ctx.beginPath();
       ctx.ellipse(x, y, 14, 14, 0, 0, 2 * Math.PI);
@@ -32,6 +35,27 @@
       const WIDTH = c.width;
       const HEIGHT = c.height;
       ctx.clearRect(0, 0, WIDTH, HEIGHT)
+      if (last_click === null || time > last_click + (DEBUG ? 2 : 10) * 1000) {
+        let target_x = (Math.sin(time / 900) * WIDTH / 2) + WIDTH / 2;
+        let target_y = (Math.cos(time / 900) * HEIGHT / 2) + HEIGHT / 2;
+        if (DEBUG) {
+          ctx.strokeStyle = "red";
+          circle(ctx, target_x, target_y)
+        }
+        let new_x = (dot_pos.x + target_x) / 2;
+        let new_y = (dot_pos.y + target_y) / 2;
+        matches = true;
+        if (Math.abs(new_x - dot_pos.x) > AUTO_SPEED) {
+          dot_pos.x += Math.sign(new_x - dot_pos.x) * AUTO_SPEED;
+        } else {
+          dot_pos.x = new_x;
+        }
+        if (Math.abs(new_y - dot_pos.y) > AUTO_SPEED) {
+          dot_pos.y += Math.sign(new_y - dot_pos.y) * AUTO_SPEED;
+        } else {
+          dot_pos.y = new_y;
+        }
+      }
       var line_color = hsv2rgb(line_h, .9, .7)
       ctx.strokeStyle = `rgb(${line_color[0] * 255},${line_color[1]*255}, ${line_color[2]*255})`;
       ctx.lineWidth = 4;
@@ -53,7 +77,8 @@
     function startDrawing() {
       document.addEventListener("mousemove", function (e) {
         if (e.buttons === 1) {
-          dot_pos = {x: e.x, y: e.y}
+          dot_pos = {x: e.x, y: e.y};
+          last_click = e.timeStamp;
         }
       })
       document.getElementById("canvas").addEventListener("wheel", function (e) {
